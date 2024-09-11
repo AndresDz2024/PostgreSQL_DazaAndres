@@ -1,4 +1,166 @@
 -- 1. Procedimiento para insertar un alumno
+CREATE OR REPLACE PROCEDURE insertar_alumno(
+    nombre VARCHAR,
+    apellido1 VARCHAR,
+    apellido2 VARCHAR,
+    fecha_nacimiento DATE,
+    nif VARCHAR,
+    sexo CHAR,
+    telefono VARCHAR DEFAULT NULL
+)
+LANGUAGE plpgsql AS $$
+BEGIN
+    INSERT INTO persona (nombre, apellido1, apellido2, fecha_nacimiento, nif, sexo, tipo, telefono)
+    VALUES (nombre, apellido1, apellido2, fecha_nacimiento, nif, sexo, 'alumno', telefono);
+END;
+$$;
+
+-- 2. Procedimiento para actualizar los datos de un alumno
+CREATE OR REPLACE PROCEDURE actualizar_alumno(
+    id_alumno INT,
+    nuevo_nombre VARCHAR,
+    nuevo_apellido1 VARCHAR,
+    nuevo_apellido2 VARCHAR,
+    nueva_fecha_nacimiento DATE,
+    nuevo_nif VARCHAR,
+    nuevo_telefono VARCHAR
+)
+LANGUAGE plpgsql AS $$
+BEGIN
+    UPDATE persona
+    SET nombre = nuevo_nombre,
+        apellido1 = nuevo_apellido1,
+        apellido2 = nuevo_apellido2,
+        fecha_nacimiento = nueva_fecha_nacimiento,
+        nif = nuevo_nif,
+        telefono = nuevo_telefono
+    WHERE id = id_alumno AND tipo = 'alumno';
+END;
+$$;
+
+-- 3. Procedimiento para buscar profesores sin departamento asignado
+CREATE OR REPLACE PROCEDURE buscar_profesores_sin_departamento()
+LANGUAGE plpgsql AS $$
+BEGIN
+    PERFORM * FROM (
+        SELECT p.id, p.nombre, p.apellido1, p.apellido2
+        FROM persona p
+        LEFT JOIN profesor prof ON p.id = prof.id_profesor
+        WHERE p.tipo = 'profesor' AND prof.id_departamento IS NULL
+    ) AS resultado;
+END;
+$$;
+
+-- 4. Procedimiento para eliminar un alumno por su ID
+CREATE OR REPLACE PROCEDURE eliminar_alumno(id_alumno INT)
+LANGUAGE plpgsql AS $$
+BEGIN
+    DELETE FROM persona WHERE id = id_alumno AND tipo = 'alumno';
+END;
+$$;
+
+-- 5. Procedimiento para insertar un profesor
+CREATE OR REPLACE PROCEDURE insertar_profesor(
+    nombre VARCHAR,
+    apellido1 VARCHAR,
+    apellido2 VARCHAR,
+    fecha_nacimiento DATE,
+    nif VARCHAR,
+    sexo CHAR,
+    telefono VARCHAR DEFAULT NULL,
+    id_departamento INT DEFAULT NULL
+)
+LANGUAGE plpgsql AS $$
+DECLARE
+    nuevo_id_profesor INT;
+BEGIN
+    INSERT INTO persona (nombre, apellido1, apellido2, fecha_nacimiento, nif, sexo, tipo, telefono)
+    VALUES (nombre, apellido1, apellido2, fecha_nacimiento, nif, sexo, 'profesor', telefono)
+    RETURNING id INTO nuevo_id_profesor;
+    
+    INSERT INTO profesor (id_profesor, id_departamento)
+    VALUES (nuevo_id_profesor, id_departamento);
+END;
+$$;
+
+-- 6. Procedimiento para actualizar la información de un profesor
+CREATE OR REPLACE PROCEDURE actualizar_profesor(
+    id_profesor INT,
+    nuevo_nombre VARCHAR,
+    nuevo_apellido1 VARCHAR,
+    nuevo_apellido2 VARCHAR,
+    nueva_fecha_nacimiento DATE,
+    nuevo_nif VARCHAR,
+    nuevo_telefono VARCHAR,
+    nuevo_id_departamento INT
+)
+LANGUAGE plpgsql AS $$
+BEGIN
+    UPDATE persona
+    SET nombre = nuevo_nombre,
+        apellido1 = nuevo_apellido1,
+        apellido2 = nuevo_apellido2,
+        fecha_nacimiento = nueva_fecha_nacimiento,
+        nif = nuevo_nif,
+        telefono = nuevo_telefono
+    WHERE id = id_profesor AND tipo = 'profesor';
+
+    UPDATE profesor
+    SET id_departamento = nuevo_id_departamento
+    WHERE id_profesor = id_profesor;
+END;
+$$;
+
+-- 7. Procedimiento para insertar una asignatura
+CREATE OR REPLACE PROCEDURE insertar_asignatura(
+    nombre VARCHAR,
+    creditos FLOAT,
+    tipo CHAR,
+    curso INT,
+    cuatrimestre INT,
+    id_profesor INT,
+    id_grado INT
+)
+LANGUAGE plpgsql AS $$
+BEGIN
+    INSERT INTO asignatura (nombre, creditos, tipo, curso, cuatrimestre, id_profesor, id_grado)
+    VALUES (nombre, creditos, tipo, curso, cuatrimestre, id_profesor, id_grado);
+END;
+$$;
+
+-- 8. Procedimiento para eliminar un profesor
+CREATE OR REPLACE PROCEDURE eliminar_profesor(id_profesor INT)
+LANGUAGE plpgsql AS $$
+BEGIN
+    DELETE FROM profesor WHERE id_profesor = id_profesor;
+    DELETE FROM persona WHERE id = id_profesor AND tipo = 'profesor';
+END;
+$$;
+
+-- 9. Procedimiento para buscar todas las asignaturas de un grado
+CREATE OR REPLACE PROCEDURE buscar_asignaturas_por_grado(id_grado INT)
+LANGUAGE plpgsql AS $$
+BEGIN
+    PERFORM * FROM (
+        SELECT id, nombre, creditos, tipo, curso, cuatrimestre
+        FROM asignatura
+        WHERE id_grado = id_grado
+    ) AS resultado;
+END;
+$$;
+
+-- 10. Procedimiento para insertar un departamento
+CREATE OR REPLACE PROCEDURE insertar_departamento(nombre VARCHAR)
+LANGUAGE plpgsql AS $$
+BEGIN
+    INSERT INTO departamento (nombre)
+    VALUES (nombre);
+END;
+$$;
+
+----------- Funciones
+
+-- 1. Funciones para insertar un alumno
 CREATE OR REPLACE FUNCTION insertar_alumno(
     nombre VARCHAR,
     apellido1 VARCHAR,
@@ -15,7 +177,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- 2. Procedimiento para actualizar los datos de un alumno
+
+-- 2. Funciones para actualizar los datos de un alumno
 CREATE OR REPLACE FUNCTION actualizar_alumno(
     id_alumno INT,
     nuevo_nombre VARCHAR,
@@ -38,7 +201,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- 3. Procedimiento para buscar profesores sin departamento asignado
+
+-- 3. Funciones para buscar profesores sin departamento asignado
 CREATE OR REPLACE FUNCTION buscar_profesores_sin_departamento()
 RETURNS TABLE(id INT, nombre VARCHAR, apellido1 VARCHAR, apellido2 VARCHAR) AS $$
 BEGIN
@@ -50,7 +214,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- 4. Procedimiento para eliminar un alumno por su ID
+
+-- 4. Funciones para eliminar un alumno por su ID
 CREATE OR REPLACE FUNCTION eliminar_alumno(id_alumno INT)
 RETURNS VOID AS $$
 BEGIN
@@ -58,7 +223,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- 5. Procedimiento para insertar un profesor
+
+-- 5. Funciones para insertar un profesor
 CREATE OR REPLACE FUNCTION insertar_profesor(
     nombre VARCHAR,
     apellido1 VARCHAR,
@@ -82,7 +248,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- 6. Procedimiento para actualizar la información de un profesor
+
+-- 6. Funciones para actualizar la información de un profesor
 CREATE OR REPLACE FUNCTION actualizar_profesor(
     id_profesor INT,
     nuevo_nombre VARCHAR,
@@ -110,7 +277,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- 7. Procedimiento para insertar una asignatura
+
+-- 7. Funciones para insertar una asignatura
 CREATE OR REPLACE FUNCTION insertar_asignatura(
     nombre VARCHAR,
     creditos FLOAT,
@@ -127,7 +295,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- 8. Procedimiento para eliminar un profesor
+
+-- 8. Funciones para eliminar un profesor
 CREATE OR REPLACE FUNCTION eliminar_profesor(id_profesor INT)
 RETURNS VOID AS $$
 BEGIN
@@ -136,7 +305,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- 9. Procedimiento para buscar todas las asignaturas de un grado
+
+-- 9. Funciones para buscar todas las asignaturas de un grado
 CREATE OR REPLACE FUNCTION buscar_asignaturas_por_grado(id_grado INT)
 RETURNS TABLE(id INT, nombre VARCHAR, creditos FLOAT, tipo CHAR, curso INT, cuatrimestre INT) AS $$
 BEGIN
@@ -147,7 +317,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- 10. Procedimiento para insertar un departamento
+
+-- 10. Funciones para insertar un departamento
 CREATE OR REPLACE FUNCTION insertar_departamento(nombre VARCHAR)
 RETURNS VOID AS $$
 BEGIN
