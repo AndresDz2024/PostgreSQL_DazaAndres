@@ -1,4 +1,201 @@
--- Procedimientos :)
+-- procedimientos :)
+
+-- 1. Insertar un nuevo producto
+CREATE OR REPLACE PROCEDURE insertar_producto(
+    p_codigo_producto VARCHAR,
+    p_nombre VARCHAR,
+    p_gama VARCHAR,
+    p_dimensiones VARCHAR,
+    p_proveedor VARCHAR,
+    p_descripcion TEXT,
+    p_cantidad_en_stock SMALLINT,
+    p_precio_venta NUMERIC(15,2),
+    p_precio_proveedor NUMERIC(15,2)
+)
+LANGUAGE plpgsql AS $$
+BEGIN
+    INSERT INTO producto (
+        codigo_producto, nombre, gama, dimensiones, proveedor, descripcion,
+        cantidad_en_stock, precio_venta, precio_proveedor
+    ) VALUES (
+        p_codigo_producto, p_nombre, p_gama, p_dimensiones, p_proveedor, p_descripcion,
+        p_cantidad_en_stock, p_precio_venta, p_precio_proveedor
+    );
+END;
+$$;
+
+-- 2. Actualizar un producto existente
+CREATE OR REPLACE PROCEDURE actualizar_producto(
+    p_codigo_producto VARCHAR,
+    p_nombre VARCHAR,
+    p_gama VARCHAR,
+    p_dimensiones VARCHAR,
+    p_proveedor VARCHAR,
+    p_descripcion TEXT,
+    p_cantidad_en_stock SMALLINT,
+    p_precio_venta NUMERIC(15,2),
+    p_precio_proveedor NUMERIC(15,2)
+)
+LANGUAGE plpgsql AS $$
+BEGIN
+    UPDATE producto
+    SET nombre = p_nombre,
+        gama = p_gama,
+        dimensiones = p_dimensiones,
+        proveedor = p_proveedor,
+        descripcion = p_descripcion,
+        cantidad_en_stock = p_cantidad_en_stock,
+        precio_venta = p_precio_venta,
+        precio_proveedor = p_precio_proveedor
+    WHERE codigo_producto = p_codigo_producto;
+END;
+$$;
+
+-- 3. Eliminar un producto
+CREATE OR REPLACE PROCEDURE eliminar_producto(p_codigo_producto VARCHAR)
+LANGUAGE plpgsql AS $$
+BEGIN
+    DELETE FROM producto WHERE codigo_producto = p_codigo_producto;
+END;
+$$;
+
+-- 4. Buscar productos por gama
+CREATE OR REPLACE PROCEDURE buscar_productos_por_gama(p_gama VARCHAR)
+LANGUAGE plpgsql AS $$
+BEGIN
+    PERFORM * FROM producto WHERE gama = p_gama;
+END;
+$$;
+
+-- 5. Insertar una nueva oficina
+CREATE OR REPLACE PROCEDURE insertar_oficina(
+    p_codigo_oficina VARCHAR,
+    p_ciudad VARCHAR,
+    p_pais VARCHAR,
+    p_region VARCHAR,
+    p_codigo_postal VARCHAR,
+    p_telefono VARCHAR,
+    p_linea_direccion1 VARCHAR,
+    p_linea_direccion2 VARCHAR
+)
+LANGUAGE plpgsql AS $$
+BEGIN
+    INSERT INTO oficina (
+        codigo_oficina, ciudad, pais, region, codigo_postal, telefono, linea_direccion1, linea_direccion2
+    ) VALUES (
+        p_codigo_oficina, p_ciudad, p_pais, p_region, p_codigo_postal, p_telefono, p_linea_direccion1, p_linea_direccion2
+    );
+END;
+$$;
+
+-- 6. Actualizar una oficina existente
+CREATE OR REPLACE PROCEDURE actualizar_oficina(
+    p_codigo_oficina VARCHAR,
+    p_ciudad VARCHAR,
+    p_pais VARCHAR,
+    p_region VARCHAR,
+    p_codigo_postal VARCHAR,
+    p_telefono VARCHAR,
+    p_linea_direccion1 VARCHAR,
+    p_linea_direccion2 VARCHAR
+)
+LANGUAGE plpgsql AS $$
+BEGIN
+    UPDATE oficina
+    SET ciudad = p_ciudad,
+        pais = p_pais,
+        region = p_region,
+        codigo_postal = p_codigo_postal,
+        telefono = p_telefono,
+        linea_direccion1 = p_linea_direccion1,
+        linea_direccion2 = p_linea_direccion2
+    WHERE codigo_oficina = p_codigo_oficina;
+END;
+$$;
+
+-- 7. Eliminar una oficina
+CREATE OR REPLACE PROCEDURE eliminar_oficina(p_codigo_oficina VARCHAR)
+LANGUAGE plpgsql AS $$
+BEGIN
+    DELETE FROM oficina WHERE codigo_oficina = p_codigo_oficina;
+END;
+$$;
+
+-- 8. Buscar oficinas por ciudad
+CREATE OR REPLACE PROCEDURE buscar_oficinas_por_ciudad(p_ciudad VARCHAR)
+LANGUAGE plpgsql AS $$
+BEGIN
+    PERFORM * FROM oficina WHERE ciudad = p_ciudad;
+END;
+$$;
+
+-- 9. Insertar un nuevo cliente
+CREATE OR REPLACE PROCEDURE insertar_cliente(
+    p_codigo_cliente INTEGER,
+    p_nombre_cliente VARCHAR,
+    p_nombre_contacto VARCHAR,
+    p_apellido_contacto VARCHAR,
+    p_telefono VARCHAR,
+    p_fax VARCHAR,
+    p_linea_direccion1 VARCHAR,
+    p_linea_direccion2 VARCHAR,
+    p_ciudad VARCHAR,
+    p_region VARCHAR,
+    p_pais VARCHAR,
+    p_codigo_postal VARCHAR,
+    p_codigo_empleado_rep_ventas INTEGER,
+    p_limite_credito NUMERIC(15,2)
+)
+LANGUAGE plpgsql AS $$
+BEGIN
+    INSERT INTO cliente (
+        codigo_cliente, nombre_cliente, nombre_contacto, apellido_contacto, telefono, fax, linea_direccion1, linea_direccion2,
+        ciudad, region, pais, codigo_postal, codigo_empleado_rep_ventas, limite_credito
+    ) VALUES (
+        p_codigo_cliente, p_nombre_cliente, p_nombre_contacto, p_apellido_contacto, p_telefono, p_fax, p_linea_direccion1, p_linea_direccion2,
+        p_ciudad, p_region, p_pais, p_codigo_postal, p_codigo_empleado_rep_ventas, p_limite_credito
+    );
+END;
+$$;
+
+-- 10. Actualizar un cliente existente
+CREATE OR REPLACE PROCEDURE actualizar_cliente(
+    p_codigo_cliente INTEGER,
+    p_nombre_cliente VARCHAR,
+    p_nombre_contacto VARCHAR,
+    p_apellido_contacto VARCHAR,
+    p_telefono VARCHAR,
+    p_fax VARCHAR,
+    p_linea_direccion1 VARCHAR,
+    p_linea_direccion2 VARCHAR,
+    p_ciudad VARCHAR,
+    p_region VARCHAR,
+    p_pais VARCHAR,
+    p_codigo_postal VARCHAR,
+    p_codigo_empleado_rep_ventas INTEGER,
+    p_limite_credito NUMERIC(15,2)
+)
+LANGUAGE plpgsql AS $$
+BEGIN
+    UPDATE cliente
+    SET nombre_cliente = p_nombre_cliente,
+        nombre_contacto = p_nombre_contacto,
+        apellido_contacto = p_apellido_contacto,
+        telefono = p_telefono,
+        fax = p_fax,
+        linea_direccion1 = p_linea_direccion1,
+        linea_direccion2 = p_linea_direccion2,
+        ciudad = p_ciudad,
+        region = p_region,
+        pais = p_pais,
+        codigo_postal = p_codigo_postal,
+        codigo_empleado_rep_ventas = p_codigo_empleado_rep_ventas,
+        limite_credito = p_limite_credito
+    WHERE codigo_cliente = p_codigo_cliente;
+END;
+$$;
+
+-- Funciones :)
 
 -- 1. Insertar un nuevo producto
 CREATE OR REPLACE FUNCTION insertar_producto(
